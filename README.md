@@ -19,7 +19,7 @@ The data must be placed in the root directory of the repository.
 
 ## Download weights of pre-trained model
 
-You must download the pre-trained model by asking access to download from google drive [here](https://drive.google.com/file/d/1-EUbsqAaz-J1CTlmQqaUrVJv-O-ljM1T/view?usp=sharing).
+You must download the pre-trained model by asking access to download from google drive [here](https://drive.google.com/file/d/1rKblIFJGTqxMSnX_kYpHk1DZ7RhrwD31/view?usp=sharing).
 Please put download file `network.pth` in path `root/classify/`.
 ## Environment setup 
 Please run : 
@@ -107,7 +107,7 @@ torch.cuda.is_available()
 >>> True
 ```
 ```sh
-!cd gdrive/MyDrive/instadeep/classify && python main.py
+!cd gdrive/MyDrive/PfamClassification/classify && python main.py
 ```
 At the end of the execution : the model parameters will be saved in `network.pth`.
 Below are photo snippets of how the training should look like.
