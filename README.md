@@ -31,6 +31,7 @@ $ conda env create --name envname --file environment.yml
 
 Your folder should look like this :
 
+```sh
 ├── README.md
 ├── **classify**
 │   ├── data_preparation.py
@@ -51,6 +52,7 @@ Your folder should look like this :
 │   └── training.png
 ├── raw_train.csv
 └── utils.py
+```
 
 The file `raw_train.csv` is computed is the section 1/Data Analysis below.
 ## Repository architecture
