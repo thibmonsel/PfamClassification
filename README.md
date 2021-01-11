@@ -33,21 +33,21 @@ Your folder should look like this :
 
 ```sh
 ├── README.md
-├── **classify**
+├── classify
 │   ├── data_preparation.py
 │   ├── label_encoder.p
 │   ├── main.py
 │   ├── network.pth
 │   └── network.py
-├── **data_analysis**
+├── data_analysis
 │   ├── data_analysis.ipynb
 │   └── your_report.html
 ├── environment.yml
-├── **random_split**
-│   ├── **dev**
-│   ├── **test**
-│   └── **train**
-├── **static**
+├── random_split
+│   ├── dev
+│   ├── test
+│   └── train
+├── static
 │   ├── evaluating.png
 │   └── training.png
 ├── raw_train.csv
