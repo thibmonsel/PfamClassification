@@ -116,12 +116,12 @@ def test(epoch):
         taux_classif_file = 100. * file_correct / len(test_loader.dataset)
         print('For file {}, accuracy: {}%  -- testing loss {}'.format(filename, taux_classif_file, file_loss))
     taux_classif_total = 100. * total_correct / dataset_length
-    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {}'.format(epoch, taux_classif_file, file_loss))
+    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {}'.format(epoch, taux_classif_total, file_loss))
 
 if __name__ == "__main__":
     family_accession_encoder()
     for epoch in range(1, 3):
-        #train(epoch)
+        train(epoch)
         test(epoch)
        
    
