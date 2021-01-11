@@ -115,7 +115,7 @@ Below are photo snippets of how the training should look like.
 ![training](./static/training.png)
 ![evaluating](./static/evaluating.png)
 
-Model's testing accuracy is `65.39%`. No **f1 score** with recall and precision was computed here since there are too many classes.
+Model's testing accuracy is `55%`. No **f1 score** with recall and precision was computed here since there are too many classes.
 
 #### Evaluating protein sequence family accession
 The file `main_prediction.py` enables the user to predict family accession of one protein with a CLI.
