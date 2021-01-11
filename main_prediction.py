@@ -6,7 +6,7 @@ import os, sys
 sys.path.append("./classify")
 from data_preparation import DataPreparation
 from network import NN2
-
+  
 import pickle
 import numpy as np
 import pandas as pd
@@ -35,8 +35,10 @@ if __name__ == "__main__":
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     with torch.no_grad():
-        model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES)
-        model.load_state_dict(torch.load('./classify/network.pth',map_location='cpu'))
+        model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES).to(device)
+        #loading depending if CPU/gpu
+        model.load_state_dict(torch.load('./classify/network.pth', map_location={'cuda:0': 'cpu'}))
+        model.to(device)
         model.eval()
         x = torch.from_numpy(np.array(encode_sequence(args.sequence), dtype=np.float64)).long()
         x = x.unsqueeze(dim=0)
@@ -46,4 +48,4 @@ if __name__ == "__main__":
         prediction = out.argmax(dim=1, keepdim=True) 
         encoding = pickle.load(open("./classify/label_encoder.p", "rb" ))
         re_encoding = {v: k for k, v in encoding.items()}
-        print("For the sequence {} we predict that its family accession is {}.".format(args.sequence, re_encoding[prediction.item()])) 
+        print("For the sequence {}... we predict that its family accession is {}.".format(args.sequence[:20], re_encoding[prediction.item()])) 

@@ -83,9 +83,10 @@ def train(epoch):
 
 @torch.no_grad()   
 def test(epoch):
-    print("#### EVALUATION ####")
+    print("#### EVALUATION #####")
     model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES)
-    model.load_state_dict(torch.load('network.pth'))
+    #loading depending if CPU/GPU
+    model.load_state_dict(torch.load('network.pth', map_location={'cuda:0': 'cpu'}))
     model.to(device)
     model.eval()
     total_correct, total_loss, dataset_length = 0, 0, 0
@@ -120,7 +121,7 @@ def test(epoch):
 if __name__ == "__main__":
     family_accession_encoder()
     for epoch in range(1, 3):
-        train(epoch)
+        #train(epoch)
         test(epoch)
        
    
