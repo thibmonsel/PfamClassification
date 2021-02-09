@@ -1,7 +1,6 @@
 import os, sys 
 sys.path.append("../")
 from utils import * 
-from metricsgroup import MetricsGroup
 from data_preparation import DataPreparation
 from network import NN2
 
@@ -14,6 +13,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.autograd import Variable
 import torch.utils.data as data_utils
+from sklearn.metrics import f1_score
 
 
 NUM_EMBEDDINGS = len(amino_acid_code) + 1
@@ -56,7 +56,6 @@ def train(epoch):
     print("#### TRAINING ####")
     model.train()
     
-    
     for filename in os.listdir('../random_split/train/'):
         
         #preprocessing raw data
@@ -81,7 +80,6 @@ def train(epoch):
             optimizer.step()
             if batch_idx % 100 == 0:
                 print('batch {} [{}/{}] training loss: {}'.format(batch_idx,batch_idx*len(x),len(train_loader.dataset),l.item()))
-
     print("Saving model for {} epoch".format(epoch))
     torch.save(model.state_dict(), 'network.pth') 
     
@@ -90,14 +88,6 @@ def train(epoch):
 @torch.no_grad()   
 def test(epoch):
     #Creating metrics 
-    p = Precision()
-    r = Recall()
-    m_group = MetricsGroup({
-        "accuracy": Accuracy(),
-        "precision": p,
-        "recall": r,
-        "f1": Fbeta(beta=1.0, average=False, precision=p, recall=r) }
-                           )
     print("#### EVALUATION #####")
     model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES)
     #loading depending if CPU/GPU
@@ -105,10 +95,12 @@ def test(epoch):
     model.to(device)
     model.eval()
     total_correct, total_loss, dataset_length = 0, 0, 0
+    concat_prediction, concat_target = torch.empty(0).cpu(), torch.empty(0).cpu()
     for filename in os.listdir('../random_split/dev/'):
         file_loss, file_correct = 0, 0  
         #preprocessing raw data
         df = open_data('../random_split/dev/'+filename)
+        df = get_clean_data(df, family_accession_valid)
         prepare = DataPreparation(df)
         prepare.encode_sequence()
         prepare.encode_family_accession()
@@ -124,16 +116,16 @@ def test(epoch):
             l = loss_fn(out, target)
             file_loss += l
             total_loss += l
-            prediction = out.argmax(dim=1, keepdim=True) 
+            prediction = out.argmax(dim=1, keepdim=True)
+            concat_prediction = torch.cat((concat_prediction, prediction.cpu()), 0)
+            concat_target = torch.cat((concat_target, target.cpu()), 0)
             file_correct += prediction.eq(target.view_as(prediction)).sum().item()
             total_correct += prediction.eq(target.view_as(prediction)).sum().item()
-            m_group.update((prediction, target))
+            
         taux_classif_file = 100. * file_correct / len(test_loader.dataset)
-        scores = m_group.compute()
-        print('For file {}, accuracy: {}%  -- testing loss {} --- precision {}, recall {} and f1 {}.'.format(filename, taux_classif_file, file_loss, scores['precision'], scores['recall'], scores['f1']))
+        print('For file {}, accuracy: {}%  -- testing loss {} --- f1-score {}.'.format(filename, taux_classif_file, file_loss, f1_score(concat_prediction, concat_target, average='weighted') ))
     taux_classif_total = 100. * total_correct / dataset_length
-    scores = m_group.compute()
-    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {} --- precision {}, recall {} and f1 {}'.format(epoch, taux_classif_total, file_loss, scores['precision'], scores['recall'], scores['f1']))
+    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {} --- f1-score {}'.format(epoch, taux_classif_total, file_loss, f1_score(concat_prediction, concat_target, average='weighted')))
 
 if __name__ == "__main__":
     family_accession_encoder()

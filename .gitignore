@@ -4,3 +4,5 @@ random_split/
 .vscode/
 
 *.csv
+.DS_store
+*.pth
