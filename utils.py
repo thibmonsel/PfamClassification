@@ -7,7 +7,7 @@ import os
 TRAIN = '../random_split/train/'
 amino_acid_code = ['A', 'R', 'N', 'D', 'C', 'Q', 'E', 'G', 'H', 'I', 'L', 'K', 'M', 'F', 'P', 'S','T','W', 'Y', 'V', 'O', 'U', 'B', 'Z', 'X', 'J']
 amino_acid_encoder = dict(zip(amino_acid_code, np.arange(1, len(amino_acid_code)+1, dtype=np.int64)))
-PADDING = 2200 #since max length sequence in train is 2200 for sequence (refer to pd profiler)
+PADDING = 500  #since max length sequence in train is 500 for sequence (refer to pd profiler for clean data)
 
 def open_data(filename) : 
     """
@@ -24,6 +24,7 @@ def concatenate_data(save_filename):
         df = open_data(TRAIN + filename)
         frames = [df_init, df]
         df_init = pd.concat(frames)
+        df_init = df_init.reset_index(drop=True)
     df_init.to_csv(save_filename)
  
 def get_information_on_data(filename):
@@ -45,6 +46,21 @@ def generate_html_profiling(filename,report_name):
     profile =  ProfileReport(df, title='Profiling Report of {}'.format(filename), explorative=True)
     profile.to_file(report_name)
 
+def get_classes_that_have_num_occurence(df):
+    #we only take the classes that have more than 50 ocurrences
+    index_df = df['family_accession'].value_counts() > 50 
+    return index_df[index_df].index
+
+def get_clean_data(df, valid_family_accession):
+    #valid_family_accession is given thanks to get_classes_that_have_num_occurence("../raw_train.csv") 
+    df["delete"] = df["family_accession"].apply(lambda x : False if x in valid_family_accession else True)
+    df["delete2"] = df["sequence"].apply(lambda x : True if len(x) >500 else False)
+    df = df[df['delete']==False]
+    df = df[df['delete2']==False]
+    df = df.drop(columns=["family_id", "sequence_name", "delete", "delete2"])
+    df = df.reset_index(drop=True)
+    return df
+
 def encode_sequence(sequence):
     """
     Encode a protein sequence into integers
@@ -58,3 +74,4 @@ def from_prediction_get_family_accession(n):
     From the output prediction given by model get the family accession name of n
     """
     d = pickle.load(open("label_encoder.p", "rb" ))
+    

@@ -21,7 +21,7 @@ EMBEDDING_DIM = 36
 OUT_CHANNELS1 = 7
 OUT_CHANNELS2 = 5
 HIDDEN_SIZE = 3
-LINEAR_HIDDEN = 9000
+LINEAR_HIDDEN = 6000
 NUM_CLASSES = len(pickle.load(open("label_encoder.p", "rb" ))) #given the label encoder  
 
 BATCH_SIZE= 64
@@ -35,6 +35,7 @@ model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_
 
 #check number of parameters in model
 print("Number of trainable parameters",sum(p.numel() for p in model.parameters() if p.requires_grad))
+print(model)
 
 model.to(device) # puts model on GPU / CPU
 
@@ -42,9 +43,13 @@ model.to(device) # puts model on GPU / CPU
 optimizer = torch.optim.SGD(model.parameters(), lr=learning_rate)
 loss_fn = nn.CrossEntropyLoss()
 
+#those are the valid classes used after data processing
+df = open_data('../raw_clean_data.csv')
+family_accession_valid = get_classes_that_have_num_occurence(df)
+
 def family_accession_encoder():
     #creating family_accession label encoder 
-    df = open_data('../raw_train.csv')
+    df = open_data('../raw_clean_data.csv')
     prepare = DataPreparation(df)
     prepare.create_label_encoder()
 
@@ -52,10 +57,12 @@ def train(epoch):
     print("#### TRAINING ####")
     model.train()
     
+    
     for filename in os.listdir('../random_split/train/'):
         
         #preprocessing raw data
         df = open_data('../random_split/train/'+filename)
+        df = get_clean_data(df, family_accession_valid)
         prepare = DataPreparation(df)
         prepare.encode_sequence()
         prepare.encode_family_accession()
@@ -90,10 +97,10 @@ def test(epoch):
     model.to(device)
     model.eval()
     total_correct, total_loss, dataset_length = 0, 0, 0
-    for filename in os.listdir('../random_split/test/'):
+    for filename in os.listdir('../random_split/dev/'):
         file_loss, file_correct = 0, 0  
         #preprocessing raw data
-        df = open_data('../random_split/test/'+filename)
+        df = open_data('../random_split/dev/'+filename)
         prepare = DataPreparation(df)
         prepare.encode_sequence()
         prepare.encode_family_accession()

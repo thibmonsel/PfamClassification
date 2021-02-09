@@ -37,11 +37,11 @@ class NN2(nn.Module):
         self.maxpool2 = nn.MaxPool2d(3, stride=2)
 
         #bilstm layer 
-        self.bilstm = nn.LSTM(input_size=2200, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
+        self.bilstm = nn.LSTM(input_size=500, hidden_size=self.hidden_size, bidirectional=True, batch_first=True)
         
         #linear layer
         #64 * self.out_channels2 * 273 * 3 + 64 * self.embedding_dim * 2 * self.hidden_size
-        self.linear1 = nn.Linear(4311 , self.linear_hidden)
+        self.linear1 = nn.Linear(1131 , self.linear_hidden)
         self.dropout = nn.Dropout(p=0.2)
         self.linear2 = nn.Linear(self.linear_hidden, self.nb_classes)
 

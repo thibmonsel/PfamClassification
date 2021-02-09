@@ -31,12 +31,10 @@ NUM_CLASSES = len(pickle.load(open("./classify/label_encoder.p", "rb" ))) #given
 
 
 if __name__ == "__main__":
-    # we use GPU if available, otherwise CPU
     device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
     
     with torch.no_grad():
         model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES).to(device)
-        #loading depending if CPU/gpu
         model.load_state_dict(torch.load('./classify/network.pth', map_location={'cuda:0': 'cpu'}))
         model.to(device)
         model.eval()
