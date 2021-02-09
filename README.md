@@ -1,6 +1,6 @@
-# InstaDeep Pfam Classification
+# Pfam Classification
 
-The technical test comes from kaggle, [here](https://www.kaggle.com/googleai/pfam-seed-random-split).
+The competition comes from kaggle, [here](https://www.kaggle.com/googleai/pfam-seed-random-split).
 Given a protein sequence, once must classify it to a certain class.
 
 ## Clone repository
