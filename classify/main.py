@@ -129,7 +129,7 @@ def test(epoch):
 
 if __name__ == "__main__":
     family_accession_encoder()
-    for epoch in range(1, 3):
+    for epoch in range(1, EPOCH):
         train(epoch)
         test(epoch)
        
