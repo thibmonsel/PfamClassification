@@ -1,3 +1,4 @@
+from ignite.metrics import Accuracy, Precision, Recall, Fbeta
 import pandas as pd
 from pandas_profiling import ProfileReport
 import numpy as np

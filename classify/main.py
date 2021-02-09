@@ -1,7 +1,7 @@
 import os, sys 
 sys.path.append("../")
 from utils import * 
-
+from metricsgroup import MetricsGroup
 from data_preparation import DataPreparation
 from network import NN2
 
@@ -35,7 +35,6 @@ model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_
 
 #check number of parameters in model
 print("Number of trainable parameters",sum(p.numel() for p in model.parameters() if p.requires_grad))
-print(model)
 
 model.to(device) # puts model on GPU / CPU
 
@@ -90,6 +89,15 @@ def train(epoch):
 
 @torch.no_grad()   
 def test(epoch):
+    #Creating metrics 
+    p = Precision()
+    r = Recall()
+    m_group = MetricsGroup({
+        "accuracy": Accuracy(),
+        "precision": p,
+        "recall": r,
+        "f1": Fbeta(beta=1.0, average=False, precision=p, recall=r) }
+                           )
     print("#### EVALUATION #####")
     model = NN2(NUM_EMBEDDINGS, EMBEDDING_DIM ,OUT_CHANNELS1 ,OUT_CHANNELS2, HIDDEN_SIZE, LINEAR_HIDDEN, NUM_CLASSES)
     #loading depending if CPU/GPU
@@ -119,11 +127,13 @@ def test(epoch):
             prediction = out.argmax(dim=1, keepdim=True) 
             file_correct += prediction.eq(target.view_as(prediction)).sum().item()
             total_correct += prediction.eq(target.view_as(prediction)).sum().item()
-
+            m_group.update((prediction, target))
         taux_classif_file = 100. * file_correct / len(test_loader.dataset)
-        print('For file {}, accuracy: {}%  -- testing loss {}'.format(filename, taux_classif_file, file_loss))
+        scores = m_group.compute()
+        print('For file {}, accuracy: {}%  -- testing loss {} --- precision {}, recall {} and f1 {}.'.format(filename, taux_classif_file, file_loss, scores['precision'], scores['recall'], scores['f1']))
     taux_classif_total = 100. * total_correct / dataset_length
-    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {}'.format(epoch, taux_classif_total, file_loss))
+    scores = m_group.compute()
+    print('Epoch {} : Total testing accuracy: {}%  -- testing loss {} --- precision {}, recall {} and f1 {}'.format(epoch, taux_classif_total, file_loss, scores['precision'], scores['recall'], scores['f1']))
 
 if __name__ == "__main__":
     family_accession_encoder()
