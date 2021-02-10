@@ -119,7 +119,7 @@ Below are photo snippets of how the training should look like.
 ![evaluating](./static/evaluating.png)
 ![training2](./static/training2.png)
 
-Model's testing accuracy is `55%`. No **f1 score** with recall and precision was computed here since there are too many classes.
+Model's validating f1 score is `0.87`.
 
 #### Evaluating protein sequence family accession
 The file `main_prediction.py` enables the user to predict family accession of one protein with a CLI.
@@ -134,8 +134,9 @@ python main_prediction.py --sequence="AGVPCSVKASEGYLFPLDRCFLFVTKPTLYIPYSEISSVVMS
 With the large amount of data, the easiest way to have a fast summary of the data was to merge all of the test data in one csv file and then do a panda profiler.  Thanks to that I was able to see how big was the dataset (`1,000,000` datapoint) and roughly `18,000` classes.
 
 After that, data preprocessing was mandatory. 
-![training2](./static/data_analysis.png)
 We can see there that most sequence a no longer than `500` amino-acids so sequence that were longer than `500` we took out the data. Afterwards, we also filtered out classes that had less than `50` occurences in the dataset. For more information please refer to the jupyter notebook.
+
+![training2](./static/data_analysis.png)
 
 Since both of the input (sequence) and output (family_accession) were **categorical**, encoding and possible embedding was necessary in order to feed it to  a DL model.
 
