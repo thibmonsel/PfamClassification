@@ -42,25 +42,27 @@ Your folder should look like this :
 ├── data_analysis
 │   ├── data_analysis.ipynb
 │   └── your_report.html
+│   └── your_clean_report.html
 ├── environment.yml
 ├── random_split
 │   ├── dev
 │   ├── test
 │   └── train
 ├── static
-│   ├── evaluating.png
-│   └── training.png
 ├── raw_train.csv
+├── raw_clean_data.csv
 └── utils.py
 ```
 
-The file `raw_train.csv` is computed is the section 1/Data Analysis below.
+The file `raw_train.csv` and `raw_clean_data.csv` is computed is the section 1/Data Analysis below.
 ## Repository architecture
 
 - In the root directory we have a `utils.py` file where are located helper functions and a `environment.yml` file for virtual environment setup.
 - In the **data_analysis** directory :
     * `data_analysis.ipynb` notebook that summarizes general information on the dataset.
-    * `your_report.html` is an Panda Profiler of the test data.
+    * `your_report.html` is an Panda Profiler of the test data.    
+    * `your_clean_report.html` is an Panda Profiler of the filtered clean data.
+
 - In **the classify** directory :
     * `data_preparation.py` contains the `DataPreparation` class that helps encode **family_accession** and protein sequences.
     * `label_encoder.p` is a pickled file that stores the **family_accession** encoder generated with the training data. 
@@ -80,12 +82,13 @@ If you want to open the data profiler through **terminal**.
 ```sh
 $ cd data_analysis
 $ open("your_report.html")
+$ open("your_clean_report.html")
 ```
 
 ### 2/ Classifying
 
-Please make sure that `raw_train.csv` exist and is in the root directory.
-The model has `200,250,086` parameters and needs GPU for training.
+Please make sure that `raw_train.csv` and `raw_clean_data.csv` exist and are in the root directory.
+The model has `39,018,724` parameters and needs GPU for training.
 
 #### Training
 I do not recommend training it on a cpu...
@@ -114,6 +117,7 @@ Below are photo snippets of how the training should look like.
 
 ![training](./static/training.png)
 ![evaluating](./static/evaluating.png)
+![training2](./static/training2.png)
 
 Model's testing accuracy is `55%`. No **f1 score** with recall and precision was computed here since there are too many classes.
 
@@ -129,11 +133,15 @@ python main_prediction.py --sequence="AGVPCSVKASEGYLFPLDRCFLFVTKPTLYIPYSEISSVVMS
 
 With the large amount of data, the easiest way to have a fast summary of the data was to merge all of the test data in one csv file and then do a panda profiler.  Thanks to that I was able to see how big was the dataset (`1,000,000` datapoint) and roughly `18,000` classes.
 
+After that, data preprocessing was mandatory. 
+![training2](./static/data_analysis.png)
+We can see there that most sequence a no longer than `500` amino-acids so sequence that were longer than `500` we took out the data. Afterwards, we also filtered out classes that had less than `50` occurences in the dataset. For more information please refer to the jupyter notebook.
+
 Since both of the input (sequence) and output (family_accession) were **categorical**, encoding and possible embedding was necessary in order to feed it to  a DL model.
 
 For the protein sequence :
 - Mapped each amino acids (24 of them) to one unique integer. ('A' maps to 1)
-- Thanks to the panda profiler the max length of one protein in the testset was roughly `21000`. So I choose a fixed sequence-length of `22000` and did some zero padding. 
+- Thanks to the panda profiler the max length of one protein in the testset was roughly `500` after data processing. So I choose a fixed sequence-length of `500` and did some zero padding. 
 
 
 For the family_accession : 
@@ -142,10 +150,11 @@ For the family_accession :
 
 I chose to do a Deep Learning model with the Pytorch framework.
 
-In order to get a meaningful representation of the sequence I started out with an `Embedding` layer. I chose to have some `Conv2d` and `LSTM` layers. Having both layers seemed to be important because convolutions would extract high level features of the sequence and the lstm one would take long-term dependencies.
+In order to get a meaningful representation of the sequence I started out with an `Embedding` layer. I chose to have some `Conv2d` and `biLSTM` layers. Having both layers seemed to be important because convolutions would extract high level features of the sequence and the lstm one would take long-term dependencies.
 After those layer, I flattened out the tensor and passed it through a fully connected network.
+Here is a simplified version of it :
 
-Note : 
-For better performance, one might need to curate the dataset.
+![nn](./static/nn.png)
+
 
 
